@@ -1,0 +1,5 @@
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f4f4f4; }
+        .bg-yellow { background-color: #ffffcc; } /* Màu nền cho điểm < 5 */
+        .stats { margin-top: 15px; font-weight: bold; }
