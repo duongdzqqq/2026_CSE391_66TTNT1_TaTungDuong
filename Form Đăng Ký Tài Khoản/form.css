@@ -1,0 +1,24 @@
+
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; background-color: #f4f7f6; }
+        #registerForm { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
+        }
+        
+        /* Password Toggle Styling */
+        .password-wrapper { position: relative; }
+        #togglePassword { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: none; cursor: pointer; }
+
+        /* Strength Meter Styling */
+        .strength-meter { height: 6px; background-color: #eee; margin-top: 8px; border-radius: 3px; overflow: hidden; }
+        #strength-bar { height: 100%; width: 0%; transition: width 0.4s ease, background-color 0.4s ease; }
+        .low { background-color: #ff4d4d; width: 33%; }
+        .medium { background-color: #ffd11a; width: 66%; }
+        .high { background-color: #2eb82e; width: 100%; }
+
+        .error-msg { color: #ff4d4d; font-size: 0.85em; margin-top: 4px; display: block; min-height: 1.2em; }
+        #nameCount { float: right; font-weight: normal; font-size: 0.9em; }
+        button[type="submit"] { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        button[type="submit"]:hover { background-color: #0056b3; }

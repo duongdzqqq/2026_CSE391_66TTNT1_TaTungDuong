@@ -1,107 +1,114 @@
+// --- 1. KHAI BÁO CÁC PHẦN TỬ ---
 const form = document.getElementById('registerForm');
-const successArea = document.getElementById('successMsg');
+const passwordInput = document.getElementById('password');
+const toggleBtn = document.getElementById('togglePassword');
+const strengthBar = document.getElementById('strength-bar');
+const strengthText = document.getElementById('strength-text');
+const nameInput = document.getElementById('fullname');
+const nameCount = document.getElementById('nameCount');
 
-// --- HÀM TIỆN ÍCH ---
+// --- 2. TÍNH NĂNG NÂNG CAO (REALTIME) ---
+
+// A. Đếm ký tự Họ tên
+nameInput.addEventListener('input', function() {
+    const len = this.value.length;
+    nameCount.innerText = `${len}/50`;
+    if (len >= 50) nameCount.style.color = 'red';
+    else nameCount.style.color = 'inherit';
+    clearError('fullname'); // Xóa lỗi khi đang gõ
+});
+
+// B. Hiện/Ẩn mật khẩu
+toggleBtn.addEventListener('click', function() {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    this.innerText = isPassword ? '🙈' : '👁️';
+});
+
+// C. Thanh mức độ mật khẩu (Password Strength)
+passwordInput.addEventListener('input', function() {
+    const val = this.value;
+    let score = 0;
+
+    if (val.length >= 8) score++; 
+    if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++; 
+    if (/[0-9]/.test(val) && /[^A-Za-z0-9]/.test(val)) score++; 
+
+    // Reset class
+    strengthBar.className = '';
+    
+    if (val.length === 0) {
+        strengthText.innerText = '';
+    } else if (score === 1) {
+        strengthBar.classList.add('low');
+        strengthText.innerText = 'Yếu 🔴';
+        strengthText.style.color = '#ff4d4d';
+    } else if (score === 2) {
+        strengthBar.classList.add('medium');
+        strengthText.innerText = 'Trung bình 🟡';
+        strengthText.style.color = '#cca300';
+    } else if (score === 3) {
+        strengthBar.classList.add('high');
+        strengthText.innerText = 'Mạnh 🟢';
+        strengthText.style.color = '#2eb82e';
+    }
+});
+
+// --- 3. LOGIC VALIDATION CƠ BẢN ---
+
 function showError(fieldId, message) {
-    const errorSpan = document.getElementById(`error-${fieldId}`);
-    errorSpan.innerText = message;
+    document.getElementById(`error-${fieldId}`).innerText = message;
     document.getElementById(fieldId)?.classList.add('invalid');
 }
 
 function clearError(fieldId) {
-    const errorSpan = document.getElementById(`error-${fieldId}`);
-    errorSpan.innerText = '';
+    document.getElementById(`error-${fieldId}`).innerText = '';
     document.getElementById(fieldId)?.classList.remove('invalid');
 }
 
-// --- CÁC HÀM VALIDATE TỪNG TRƯỜNG ---
-
-function validateFullname() {
-    const val = document.getElementById('fullname').value.trim();
-    const regex = /^[a-zA-ZÀ-ỹ\s]{3,}$/; // Chữ cái, khoảng trắng, >= 3 ký tự
-    if (val === "") { showError('fullname', 'Họ tên không được để trống'); return false; }
-    if (!regex.test(val)) { showError('fullname', 'Họ tên tối thiểu 3 ký tự và chỉ chứa chữ cái'); return false; }
-    clearError('fullname'); return true;
-}
-
-function validateEmail() {
-    const val = document.getElementById('email').value.trim();
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!regex.test(val)) { showError('email', 'Email không đúng định dạng'); return false; }
-    clearError('email'); return true;
-}
-
-function validatePhone() {
-    const val = document.getElementById('phone').value.trim();
-    const regex = /^0\d{9}$/; // Bắt đầu bằng 0, tổng 10 số
-    if (!regex.test(val)) { showError('phone', 'SĐT phải có 10 số và bắt đầu bằng số 0'); return false; }
-    clearError('phone'); return true;
-}
-
-function validatePassword() {
-    const val = document.getElementById('password').value;
-    // Ít nhất 8 ký tự, 1 hoa, 1 thường, 1 số
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-    if (!regex.test(val)) { showError('password', 'Mật khẩu yếu (cần 8 ký tự, có A, a, 1)'); return false; }
-    clearError('password'); return true;
-}
-
-function validateConfirm() {
-    const pass = document.getElementById('password').value;
-    const confirm = document.getElementById('confirmPassword').value;
-    if (confirm !== pass || confirm === "") { 
-        showError('confirmPassword', 'Mật khẩu xác nhận không khớp'); return false; 
+const validate = {
+    fullname: () => {
+        const val = nameInput.value.trim();
+        if (val.length < 3) { showError('fullname', 'Họ tên tối thiểu 3 ký tự'); return false; }
+        clearError('fullname'); return true;
+    },
+    email: () => {
+        const val = document.getElementById('email').value.trim();
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!regex.test(val)) { showError('email', 'Email không hợp lệ'); return false; }
+        clearError('email'); return true;
+    },
+    phone: () => {
+        const val = document.getElementById('phone').value.trim();
+        if (!/^0\d{9}$/.test(val)) { showError('phone', 'SĐT phải 10 số, bắt đầu bằng 0'); return false; }
+        clearError('phone'); return true;
+    },
+    confirm: () => {
+        const pass = passwordInput.value;
+        const confirm = document.getElementById('confirmPassword').value;
+        if (confirm !== pass || !confirm) { showError('confirmPassword', 'Mật khẩu không khớp'); return false; }
+        clearError('confirmPassword'); return true;
     }
-    clearError('confirmPassword'); return true;
-}
+};
 
-function validateGender() {
-    const checked = document.querySelector('input[name="gender"]:checked');
-    if (!checked) { showError('gender', 'Vui lòng chọn giới tính'); return false; }
-    clearError('gender'); return true;
-}
-
-function validateTerms() {
-    const isChecked = document.getElementById('terms').checked;
-    if (!isChecked) { showError('terms', 'Bạn phải đồng ý với điều khoản'); return false; }
-    clearError('terms'); return true;
-}
-
-// --- GẮN SỰ KIỆN ---
-
-// Validate Realtime (Blur & Input)
-const inputs = ['fullname', 'email', 'phone', 'password', 'confirmPassword'];
-inputs.forEach(id => {
-    const element = document.getElementById(id);
-    // Khi rời ô: Kiểm tra lỗi
-    element.addEventListener('blur', () => {
-        if (id === 'fullname') validateFullname();
-        if (id === 'email') validateEmail();
-        if (id === 'phone') validatePhone();
-        if (id === 'password') validatePassword();
-        if (id === 'confirmPassword') validateConfirm();
-    });
-    // Khi gõ: Xóa lỗi ngay lập tức
-    element.addEventListener('input', () => clearError(id));
-});
-
-// Xử lý Submit
+// --- 4. XỬ LÝ SUBMIT ---
 form.addEventListener('submit', (e) => {
     e.preventDefault();
+    
+    // Gọi tất cả hàm validate
+    const isNameOk = validate.fullname();
+    const isEmailOk = validate.email();
+    const isPhoneOk = validate.phone();
+    const isConfirmOk = validate.confirm();
+    const isTermsOk = document.getElementById('terms').checked;
+    
+    if (!isTermsOk) showError('terms', 'Bạn chưa đồng ý điều khoản');
+    else clearError('terms');
 
-    // Sử dụng bitwise & để đảm bảo TẤT CẢ các hàm validate đều chạy (để hiện lỗi toàn bộ form)
-    const isNameValid = validateFullname();
-    const isEmailValid = validateEmail();
-    const isPhoneValid = validatePhone();
-    const isPassValid = validatePassword();
-    const isConfirmValid = validateConfirm();
-    const isGenderValid = validateGender();
-    const isTermsValid = validateTerms();
-
-    if (isNameValid && isEmailValid && isPhoneValid && isPassValid && isConfirmValid && isGenderValid && isTermsValid) {
-        const name = document.getElementById('fullname').value;
+    if (isNameOk && isEmailOk && isPhoneOk && isConfirmOk && isTermsOk) {
         form.style.display = 'none';
-        successArea.style.display = 'block';
-        successArea.innerHTML = `Đăng ký thành công! 🎉 <br> Chào mừng, ${name}!`;
+        const success = document.getElementById('successMsg');
+        success.style.display = 'block';
+        success.innerHTML = `<h2>Đăng ký thành công! 🎉</h2><p>Chào mừng ${nameInput.value}</p>`;
     }
 });
